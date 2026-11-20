@@ -1,0 +1,36 @@
+# Render Blueprint: FastAPI backend (Docker) + managed PostgreSQL.
+# The frontend deploys to Vercel separately (see DEPLOYMENT.md).
+# Render → New → Blueprint → pick this repo. You'll be prompted for the `sync: false` values.
+services:
+  - type: web
+    name: ecom-pulse-api
+    runtime: docker
+    rootDir: backend                     # only changes under backend/ trigger a deploy
+    dockerfilePath: ./backend/Dockerfile # relative to the repo root (Render docs)
+    dockerContext: ./backend
+    plan: 0.5c-512mb                     # or `free` for a demo (sleeps when idle; first request is slow)
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ecom-pulse-db
+          property: connectionString
+      - key: ALLOWED_ORIGINS             # e.g. https://ecom-pulse.vercel.app
+        sync: false
+      - key: ALLOWED_ORIGIN_REGEX        # optional, for Vercel preview URLs
+        sync: false
+      - key: DEMO_MODE
+        value: "true"
+      - key: SEED_ON_STARTUP
+        value: "true"
+      - key: SANDBOX_TTL_HOURS
+        value: "24"
+      - key: MAX_SANDBOXES
+        value: "200"
+
+databases:
+  - name: ecom-pulse-db
+    databaseName: ecom_pulse
+    user: pulse
+    plan: 0.1c-256mb                     # `free` also works but Render deletes free databases after 30 days
+    postgresMajorVersion: "16"
