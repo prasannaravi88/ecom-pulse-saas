@@ -20,7 +20,7 @@ export function Segmented<T extends string>({ value, options, onChange, label, s
           <button key={o.value} type="button" role="radio" aria-checked={active} title={o.title}
                   onClick={() => onChange(o.value)}
                   className={cn(
-                    "rounded-md font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                    "rounded-md font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     size === "sm" ? "h-6 px-2 text-xs" : "h-7 px-2.5 text-[13px]",
                     active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
                   )}>

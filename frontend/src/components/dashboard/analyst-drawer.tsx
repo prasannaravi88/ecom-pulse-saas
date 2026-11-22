@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Database, Loader2, ShieldCheck, Sparkles, TriangleAlert } from "lucide-react";
+import { ArrowRight, Database, Loader2, MessageSquareText, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,10 @@ export function AnalystDrawer({ open, onOpenChange, tenant, range, displayCurren
   useEffect(() => { api.prompts().then(setPrompts, () => setPrompts([])); }, []);
   // A different tenant, range or dataset makes earlier answers stale.
   useEffect(() => { setTurns([]); }, [tenant?.id, range, dataVersion, displayCurrency]);
-  useEffect(() => { bottom.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [turns]);
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    bottom.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "end" });
+  }, [turns]);
 
   async function ask(body: { question?: string; prompt_id?: string }, label: string) {
     if (!tenant || busy) return;
@@ -49,7 +52,7 @@ export function AnalystDrawer({ open, onOpenChange, tenant, range, displayCurren
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-xl">
         <SheetHeader className="border-b">
-          <SheetTitle className="flex items-center gap-2"><Sparkles className="text-primary size-4" aria-hidden />Analyst</SheetTitle>
+          <SheetTitle className="flex items-center gap-2"><MessageSquareText className="text-primary size-4" aria-hidden />Analyst</SheetTitle>
           <SheetDescription className="flex items-start gap-1.5">
             <ShieldCheck className="text-positive mt-0.5 size-3.5 shrink-0" aria-hidden />
             Read-only. Answers come from the same pre-computed metrics as the dashboard ({range}); it never
@@ -61,7 +64,7 @@ export function AnalystDrawer({ open, onOpenChange, tenant, range, displayCurren
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
             {turns.length === 0 && (
               <div>
-                <div className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">Executive diagnostics</div>
+                <div className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">Suggested questions</div>
                 <div className="grid gap-2">
                   {prompts.map((p) => (
                     <button key={p.id} type="button" onClick={() => ask({ prompt_id: p.id }, p.question)} disabled={busy || !tenant}
@@ -80,7 +83,7 @@ export function AnalystDrawer({ open, onOpenChange, tenant, range, displayCurren
                 </div>
                 {!t.answer && !t.error && (
                   <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                    <Loader2 className="size-4 animate-spin" aria-hidden />Reading canonical metrics…
+                    <Loader2 className="size-4 animate-spin" aria-hidden />Reading dashboard metrics…
                   </div>
                 )}
                 {t.error && <div role="alert" className="text-risk text-sm">Request failed: {t.error}</div>}
@@ -107,7 +110,7 @@ export function AnalystDrawer({ open, onOpenChange, tenant, range, displayCurren
           }}>
             <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500}
                    placeholder="Ask about margin leaks, cohorts, ROAS, COD/RTO…" aria-label="Ask the analyst"
-                   className="border-input focus-visible:ring-ring/50 h-9 min-w-0 flex-1 rounded-lg border bg-transparent px-3 text-sm outline-none focus-visible:ring-2" />
+                   className="border-input focus-visible:border-ring focus-visible:ring-ring/50 h-9 min-w-0 flex-1 rounded-lg border bg-transparent px-3 text-base outline-none focus-visible:ring-2 sm:text-sm" />
             <Button type="submit" disabled={!text.trim() || busy || !tenant}>Ask</Button>
           </form>
         </div>
@@ -223,7 +226,7 @@ function AnswerTable({ table, fmt }: { table: AnswerTableData; fmt: (v: unknown,
               <col />
               {rest.map((c, i) => <col key={c.key} style={{ width: colWidths[i] }} />)}
             </colgroup>
-            <thead className="text-muted-foreground bg-[#FAFAF9]">
+            <thead className="text-muted-foreground bg-background">
               <tr>
                 {table.columns.map((c, i) => (
                   <th key={c.key} scope="col"

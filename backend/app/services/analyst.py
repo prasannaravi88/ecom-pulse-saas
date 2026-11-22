@@ -243,8 +243,8 @@ def _channel_roas(ctx: Ctx) -> dict:
     others = [c for c in channels if c is not best]
     if others:
         o = others[0]
-        summary.append(f"{best['channel'].title()} returns {ctx.money((best['true_roas'] or 0) - (o['true_roas'] or 0))} "
-                       f"more net revenue per unit of spend than {o['channel'].title()}, at a CAC of "
+        summary.append(f"{best['channel'].title()} returns {(best['true_roas'] or 0) - (o['true_roas'] or 0):.2f} "
+                       f"more net revenue per 1 of ad spend than {o['channel'].title()}, at a CAC of "
                        f"{ctx.money(best['cac'])} vs {ctx.money(o['cac'])}.")
     return {
         "title": f"{best['channel'].title()} leads on True ROAS",
@@ -434,7 +434,7 @@ def ask(ctx: Ctx, question: str | None = None, prompt_id: str | None = None) -> 
     if is_write_attempt(question):
         return base | {"status": "refused", "intent": None, "question": question,
                        "title": "Read-only analyst",
-                       "summary": ["I can only read canonical metrics; I can't modify, delete or run queries against data. "
+                       "summary": ["I can only read the dashboard metrics; I can't modify, delete or run queries against data. "
                                    "Use the Upload CSV drawer to change data."],
                        "suggestions": prompts()}
     intent = INTENTS_BY_ID[prompt_id] if prompt_id else route(question)

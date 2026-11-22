@@ -17,29 +17,35 @@ type Basis = "contribution" | "net";
 
 const mix = (hex: string, pct: number) => `color-mix(in oklab, ${hex} ${Math.round(pct)}%, #FFFFFF)`;
 
+// Cobalt ramp text colour, computed for WCAG AA (11.5px figures need 4.5:1): ink (#111214)
+// passes up to a 79% mix, white passes from 83%. The 80-82% band fails both, so it is
+// snapped to 83%. Emerald (max 72%) and terracotta (max 58%) ramps always pass with ink.
+function cobalt(pct: number) {
+  const p = pct > 79 && pct < 83 ? 83 : pct;
+  return { background: mix("#1D4ED8", p), dark: p >= 83 };
+}
+
 function cellStyle(cell: CohortCell, row: CohortRow, mode: Mode, basis: Basis, maxRetention: number, maxLtv: number) {
   if (!cell.available) return { background: "transparent", dark: false };
   if (mode === "retention") {
-    if (cell.month === 0) return { background: "#F1F2F4", dark: false };
+    if (cell.month === 0) return { background: "var(--muted)", dark: false };
     const t = Math.min((cell.retention ?? 0) / (maxRetention || 1), 1);
-    const pct = 6 + t * 82; // sequential: one hue, light -> dark
-    return { background: mix("#1D4ED8", pct), dark: pct > 52 };
+    return cobalt(6 + t * 82); // sequential: one hue, light -> dark
   }
   const ltv = basis === "contribution" ? cell.ltv_contribution : cell.ltv_net_revenue;
   if (ltv == null) return { background: "transparent", dark: false };
   if (basis === "net") {
-    const pct = 6 + Math.min(Math.max(ltv, 0) / (maxLtv || 1), 1) * 82;
-    return { background: mix("#1D4ED8", pct), dark: pct > 52 };
+    return cobalt(6 + Math.min(Math.max(ltv, 0) / (maxLtv || 1), 1) * 82);
   }
   // Diverging around CAC: below = terracotta, at CAC = neutral, above = emerald.
-  if (!row.cac) return { background: "#F1F2F4", dark: false };
+  if (!row.cac) return { background: "var(--muted)", dark: false };
   const ratio = ltv / row.cac;
   if (ratio >= 1) {
     const pct = 10 + Math.min(ratio - 1, 1) * 62;
-    return { background: mix("#15803D", pct), dark: pct > 48 };
+    return { background: mix("#15803D", pct), dark: false };
   }
   const pct = 8 + Math.min(1 - ratio, 1) * 50;
-  return { background: mix("#B91C1C", pct), dark: pct > 48 };
+  return { background: mix("#B91C1C", pct), dark: false };
 }
 
 export function CohortHeatmap({ data }: { data: Cohorts | null }) {
@@ -184,7 +190,7 @@ function HeatLegend({ mode, basis }: { mode: Mode; basis: Basis }) {
           <span>Below CAC</span>
           <span className="flex h-2.5 w-28 overflow-hidden rounded-sm" aria-hidden>
             {[58, 32, 10].map((p) => <span key={p} className="flex-1" style={{ background: mix("#B91C1C", p) }} />)}
-            <span className="flex-1 bg-[#F1F2F4]" />
+            <span className="bg-muted flex-1" />
             {[20, 45, 72].map((p) => <span key={p} className="flex-1" style={{ background: mix("#15803D", p) }} />)}
           </span>
           <span>Above CAC ✓</span>

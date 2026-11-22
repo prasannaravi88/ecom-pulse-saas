@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Sparkles, Upload } from "lucide-react";
+import { Activity, MessageSquareText, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -58,7 +58,7 @@ export function TopBar({ tenants, tenantId, onTenant, currency, onCurrency, rang
             <Upload className="size-3.5" aria-hidden /><span className={sandbox ? "max-sm:hidden" : undefined}>Upload CSV</span>
           </Button>
           <Button size="sm" onClick={onAnalyst}>
-            <Sparkles className="size-3.5" aria-hidden /><span>Analyst</span>
+            <MessageSquareText className="size-3.5" aria-hidden /><span>Analyst</span>
           </Button>
         </div>
       </div>

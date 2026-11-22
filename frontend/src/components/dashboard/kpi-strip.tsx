@@ -20,7 +20,7 @@ function DeltaBadge({ delta, polarity }: { delta: number | null; polarity: Polar
     <span
       className={cn(
         "num inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium",
-        good === true && "bg-positive/10 text-positive",
+        good === true && "bg-positive/8 text-positive",
         good === false && "bg-risk/10 text-risk",
         good === null && "bg-muted text-muted-foreground",
       )}

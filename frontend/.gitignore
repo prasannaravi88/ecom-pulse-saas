@@ -30,11 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files: real ones stay local. The template and the non-secret dev default
-# (NEXT_PUBLIC_API_URL=http://localhost:8000) are committed on purpose.
+# env files: real ones stay local. Only the template is committed.
 .env*
 !.env.example
-!.env.development
 
 # vercel
 .vercel

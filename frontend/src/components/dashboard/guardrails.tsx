@@ -17,7 +17,7 @@ type Filter = "all" | Segment;
 type SortKey = "name" | "net_revenue" | "ad_spend" | "return_rate" | "repeat_rate" | "cm2" | "cm2_pct" | "true_roas";
 
 const SEGMENT_META: Record<Segment, { label: string; className: string; bar: string; icon?: typeof Flame }> = {
-  hero: { label: "Hero", className: "bg-positive/10 text-positive", bar: "bg-positive", icon: Flame },
+  hero: { label: "Hero", className: "bg-positive/8 text-positive", bar: "bg-positive", icon: Flame },
   margin_leak: { label: "Margin leak", className: "bg-risk/10 text-risk", bar: "bg-risk", icon: ShieldAlert },
   core: { label: "Core", className: "bg-muted text-muted-foreground", bar: "bg-transparent" },
 };
@@ -50,7 +50,7 @@ function SortHeader({ label, k, sort, onSort, align = "right" }: {
     <th scope="col" aria-sort={active ? (sort.dir === 1 ? "ascending" : "descending") : "none"}
         className={cn("px-2 py-2 font-medium whitespace-nowrap", align === "right" ? "text-right" : "text-left")}>
       <button type="button" onClick={() => onSort(k)}
-              className={cn("inline-flex items-center gap-1 rounded outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50",
+              className={cn("inline-flex items-center gap-1 rounded outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
                             active && "text-foreground")}>
         {label}<Icon className={cn("size-3", !active && "opacity-40")} aria-hidden />
       </button>
@@ -90,7 +90,7 @@ function SkuTable({ data }: { data: Skus }) {
                  ]} />
       <div className="-mx-4 overflow-x-auto">
         <table className="w-full min-w-[860px] text-xs">
-          <thead className="text-muted-foreground border-y bg-[#FAFAF9]">
+          <thead className="text-muted-foreground border-y bg-background">
             <tr>
               <SortHeader label="SKU" k="name" sort={sort} onSort={onSort} align="left" />
               <th scope="col" className="px-2 py-2 text-left font-medium">Segment</th>
@@ -167,7 +167,7 @@ function ChannelTable({ data }: { data: Channels }) {
   return (
     <div className="-mx-4 overflow-x-auto">
       <table className="w-full min-w-[820px] text-xs">
-        <thead className="text-muted-foreground border-y bg-[#FAFAF9]">
+        <thead className="text-muted-foreground border-y bg-background">
           <tr>
             {["Channel", "Ad spend", "Platform ROAS", "True ROAS", "ROAS inflation", "Refunds/RTO", "Net revenue", "New customers", "CAC"]
               .map((h, i) => <th key={h} scope="col" className={cn("px-2 py-2 font-medium whitespace-nowrap", i === 0 ? "pl-4 text-left" : "text-right", i === 8 && "pr-4")}>{h}</th>)}
@@ -179,7 +179,7 @@ function ChannelTable({ data }: { data: Channels }) {
               <td className="py-2.5 pr-2 pl-4 font-medium">
                 {name(c.channel)}
                 {c.channel === best && paid.length > 1 && (
-                  <span className="bg-positive/10 text-positive ml-2 rounded px-1.5 py-0.5 text-[10.5px] font-medium">Best True ROAS</span>
+                  <span className="bg-positive/8 text-positive ml-2 rounded px-1.5 py-0.5 text-[10.5px] font-medium">Best True ROAS</span>
                 )}
               </td>
               <td className="num px-2 text-right">{c.ad_spend ? money(c.ad_spend) : "—"}</td>

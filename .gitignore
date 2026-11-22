@@ -5,9 +5,6 @@
 *.env
 !.env.example
 !**/.env.example
-# Non-secret local dev default (NEXT_PUBLIC_API_URL=http://localhost:8000) so a fresh
-# clone's `npm run dev` works. Never put credentials in it.
-!frontend/.env.development
 
 *.pem
 *.key

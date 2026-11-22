@@ -32,7 +32,7 @@ export function SandboxBadge({ status, onReset }: { status: DemoStatus; onReset:
       <PopoverTrigger
         render={
           <button type="button" data-testid="sandbox-badge"
-                  className="border-positive/25 bg-positive/5 text-positive hover:bg-positive/10 inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border px-2 text-[11px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/50" />
+                  className="border-positive/25 bg-positive/5 text-positive hover:bg-positive/8 inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border px-2 text-[11px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring" />
         }
       >
         <span className="relative flex size-1.5" aria-hidden>

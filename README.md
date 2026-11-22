@@ -23,7 +23,7 @@ Every data endpoint needs the `X-Tenant-ID` header (or `?tenant=`). Demo tenants
 ## Frontend
 
 Single dashboard at `/` (`frontend/src/components/dashboard/`). The browser calls the API at
-`NEXT_PUBLIC_API_URL` (inlined at build time; local default in `frontend/.env.development`), so the
+`NEXT_PUBLIC_API_URL` (inlined at build time; for local dev, `cp frontend/.env.example frontend/.env.local`), so the
 backend's `ALLOWED_ORIGINS` must include the frontend origin. Production deployment: see `DEPLOYMENT.md`.
 Tenant, range and display currency live in the URL (`?tenant=&range=90D&ccy=USD`).
 
