@@ -7,7 +7,7 @@ from datetime import date, timedelta
 from typing import Annotated
 
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, Header, HTTPException, Query, UploadFile
 from fastapi.responses import PlainTextResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.db.models import Alert, Sandbox, Tenant
 from app.db.session import get_session
-from app.services import analyst, ingestion, sandbox
+from app.services import analyst, connectors, ingestion, sandbox
 from app.services.alerts import refresh_alerts
 from app.services.analytics import AnalyticsEngine, Period, PeriodPreset, custom_period, resolve_period
 
@@ -303,6 +303,59 @@ def ingest_schema() -> dict:
         "ad_spend": {"required": ingestion.SPEND_REQUIRED, "optional": list(ingestion.SPEND_OPTIONAL),
                      "aliases": ingestion.SPEND_ALIASES},
     }
+
+
+# ---------------------------------------------------------------- connectors (local simulator)
+
+
+class SyncRequest(BaseModel):
+    mode: str = "simulator"
+
+
+def _refresh(session: Session, tenant: ActiveTenant) -> None:
+    invalidate(tenant.id)
+    refresh_alerts(session, tenant.id, get_engine(session, tenant.id))
+
+
+@router.get("/connections")
+def connections(tenant: TenantDep, session: SessionDep) -> dict:
+    return {"tenant": tenant.public_id, "sandboxed": tenant.sandboxed,
+            "connections": connectors.list_connections(session, tenant.id)}
+
+
+@router.post("/connections/{provider}/sync")
+def sync_connection(provider: str, tenant: WriteTenantDep, session: SessionDep,
+                    body: SyncRequest | None = None) -> dict:
+    row = session.get(Tenant, tenant.id)
+    try:
+        result = connectors.sync(session, row, provider, (body or SyncRequest()).mode)
+    except connectors.ConnectorError as exc:
+        raise HTTPException(404 if provider not in connectors.PROVIDERS else 400, str(exc))
+    except ingestion.IngestionError as exc:
+        session.rollback()
+        raise _validation_error(exc)
+    _refresh(session, tenant)
+    return {"tenant": tenant.public_id, "sandboxed": tenant.sandboxed, "provider": provider,
+            "sync_number": result.sync_number, "orders_inserted": result.orders_inserted,
+            "spend_rows": result.spend_rows, "summary": result.summary}
+
+
+@router.post("/webhooks/orders")
+def webhook_orders(tenant: WriteTenantDep, session: SessionDep, payload: dict = Body(...)) -> dict:
+    """Inbound order webhook (local use). Same validation and all-or-nothing rules as a CSV upload."""
+    try:
+        res = ingestion.ingest_orders(session, tenant.id, connectors.orders_from_webhook(payload))
+    except connectors.ConnectorError as exc:
+        raise HTTPException(422, str(exc))
+    except ingestion.IngestionError as exc:
+        session.rollback()
+        raise _validation_error(exc)
+    connectors.record(session, tenant.id, "webhook", None,
+                      connectors.SyncResult("webhook", 0, orders_inserted=res.inserted,
+                                            summary=f"Webhook: {res.inserted} orders received"))
+    _refresh(session, tenant)
+    return {"tenant": tenant.public_id, "sandboxed": tenant.sandboxed, "rows": res.rows,
+            "orders_inserted": res.inserted, "orders_replaced": res.replaced}
 
 
 # ---------------------------------------------------------------- demo sandbox

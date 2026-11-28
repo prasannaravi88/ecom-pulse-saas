@@ -72,6 +72,13 @@ export interface DemoStatus {
   active_sandboxes: { tenant: string; created_at: string; expires_at: string }[];
 }
 
+export type Provider = "shopify" | "meta" | "google" | "webhook";
+export interface Connection {
+  provider: Provider; label: string; kind: "orders" | "ad-spend"; modes: string[]; mode: string; connected: boolean;
+  last_synced_at: string | null; sync_count: number; orders_total: number; spend_rows_total: number; last_summary: string | null;
+}
+export interface SyncResult { provider: Provider; sync_number: number; orders_inserted: number; spend_rows: number; summary: string; sandboxed: boolean }
+
 export interface UploadError { row: number | null; column: string | null; message: string }
 export class ApiError extends Error {
   constructor(message: string, public status: number, public detail?: unknown) { super(message); }
@@ -124,6 +131,11 @@ export const api = {
     return request<Record<string, unknown>>(`/api/ingest/${kind}`, t, { method: "POST", body: form });
   },
   templateUrl: (kind: "orders" | "ad-spend") => `${API_BASE}/api/ingest/templates/${kind}`,
+  connections: (t: string) => request<{ connections: Connection[]; sandboxed: boolean }>("/api/connections", t),
+  sync: (t: string, provider: Provider) =>
+    request<SyncResult>(`/api/connections/${provider}/sync`, t, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "simulator" }),
+    }),
   demoStatus: () => request<DemoStatus>("/api/demo/status"),
   resetDemo: () => request<{ reset: string[] }>("/api/demo/reset", undefined, { method: "POST" }),
 };

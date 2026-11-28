@@ -20,6 +20,20 @@ docker compose up --build             # everything; seeds two demo tenants on fi
 Every data endpoint needs the `X-Tenant-ID` header (or `?tenant=`). Demo tenants:
 `lumiere-botanicals` (INR skincare, COD-heavy) and `northbound-coffee` (USD, prepaid).
 
+## Connect APIs (local simulator)
+
+The **Connect APIs** button (next to Upload CSV) opens a drawer with Shopify, Meta Ads, Google Ads and Webhook API.
+Each card has a **Local Simulator**; **Sync now** writes a batch of sample orders (Shopify, Webhook) or daily ad spend
+(Meta, Google) for the last two days of the tenant's data, through the same validated ingestion path as a CSV upload,
+and every dashboard number recomputes. Each sync is a new batch, so orders accumulate and a day's simulator spend keeps
+a running total. Live provider APIs are not implemented; the "Live API" option is disabled.
+
+For synced data to survive restarts, run non-Docker dev with a `backend/.env` (git-ignored) containing
+`DEMO_MODE=false`, `SEED_ON_STARTUP=true` and `DATABASE_URL=sqlite:///./ecom_pulse.db`. Delete `backend/ecom_pulse.db`
+to start over. With `DEMO_MODE=true` (the public demo) syncs go to the visitor's 24h sandbox instead.
+
+`POST /api/webhooks/orders` is a real inbound endpoint for your own systems; the Webhook card shows a ready-made curl.
+
 ## Frontend
 
 Single dashboard at `/` (`frontend/src/components/dashboard/`). The browser calls the API at
@@ -55,6 +69,8 @@ Tenant, range and display currency live in the URL (`?tenant=&range=90D&ccy=USD`
 | `GET /api/alerts` | margin-leak guardrail alerts |
 | `GET /api/demo/status`, `POST /api/demo/reset` | Live Sandbox state / discard this browser's sandbox (`X-Sandbox-ID`) |
 | `POST /api/ingest/orders`, `POST /api/ingest/ad-spend` | multipart CSV upload, all-or-nothing validation |
+| `GET /api/connections`, `POST /api/connections/{shopify,meta,google,webhook}/sync` | connector state / run one Local Simulator sync (`{"mode":"simulator"}`) |
+| `POST /api/webhooks/orders` | inbound orders as JSON (`{"orders":[{order_id, order_date, customer_id, lines:[{sku, quantity, unit_price}]}]}`), same validation as CSV |
 | `GET /api/ingest/templates/{orders,ad-spend}`, `GET /api/ingest/schema` | CSV templates and accepted columns/aliases |
 
 Custom windows: `?start=YYYY-MM-DD&end=YYYY-MM-DD`. "Today" for presets is the tenant's latest data date.

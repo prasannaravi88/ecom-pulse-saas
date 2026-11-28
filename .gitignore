@@ -94,3 +94,6 @@ tmp/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Vercel local project link
+.vercel

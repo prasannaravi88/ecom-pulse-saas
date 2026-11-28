@@ -9,6 +9,7 @@ import { api, API_BASE, RANGES, type RangePreset } from "@/lib/api";
 import { formatDay, type Currency } from "@/lib/format";
 
 import { AnalystDrawer } from "./analyst-drawer";
+import { ConnectDrawer } from "./connect-drawer";
 import { CohortHeatmap } from "./cohort-heatmap";
 import { DisplayProvider } from "./display-context";
 import { Guardrails } from "./guardrails";
@@ -25,6 +26,7 @@ export function Dashboard() {
   const fx = useApi(api.fx, "fx");
   const [version, setVersion] = useState(0);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [connectOpen, setConnectOpen] = useState(false);
   const [analystOpen, setAnalystOpen] = useState(false);
 
   const list = tenants.data ?? [];
@@ -72,7 +74,7 @@ export function Dashboard() {
         onTenant={(id) => setParams({ tenant: id, ccy: null })}
         currency={currency} onCurrency={(c) => setParams({ ccy: c === tenant?.currency ? null : c })}
         range={range} onRange={(r) => setParams({ range: r === "30D" ? null : r })}
-        onUpload={() => setUploadOpen(true)} onAnalyst={() => setAnalystOpen(true)}
+        onUpload={() => setUploadOpen(true)} onConnect={() => setConnectOpen(true)} onAnalyst={() => setAnalystOpen(true)}
         demo={demo.data} onResetDemo={resetDemo}
       />
       <main className="mx-auto w-full max-w-[1400px] space-y-4 px-4 py-5 md:px-6">
@@ -108,6 +110,9 @@ export function Dashboard() {
       <UploadDrawer open={uploadOpen} onOpenChange={setUploadOpen} tenant={tenant}
                     demo={demo.data?.demo_mode ? demo.data : null}
                     onUploaded={() => setVersion((v) => v + 1)} />
+      <ConnectDrawer open={connectOpen} onOpenChange={setConnectOpen} tenant={tenant}
+                     demo={demo.data?.demo_mode ? demo.data : null}
+                     onSynced={() => setVersion((v) => v + 1)} />
       <AnalystDrawer open={analystOpen} onOpenChange={setAnalystOpen} tenant={tenant} range={range}
                      displayCurrency={currency} dataVersion={version} />
     </DisplayProvider>

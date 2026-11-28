@@ -178,6 +178,28 @@ class Alert(Base):
     message: Mapped[str] = mapped_column(String(1000))
 
 
+class Connection(Base):
+    """Per-tenant state of one data source (shopify | meta | google | webhook).
+
+    Only the local simulator is implemented: it generates sample rows and writes them through
+    the same CSV ingestion path as an upload. No credentials are ever stored here.
+    """
+
+    __tablename__ = "connections"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("tenants.id", ondelete="CASCADE"), index=True)
+    provider: Mapped[str] = mapped_column(String(16))
+    mode: Mapped[str] = mapped_column(String(16), default="simulator")
+    last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    sync_count: Mapped[int] = mapped_column(Integer, default=0)
+    orders_total: Mapped[int] = mapped_column(Integer, default=0)
+    spend_rows_total: Mapped[int] = mapped_column(Integer, default=0)
+    last_summary: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+    __table_args__ = (UniqueConstraint("tenant_id", "provider", name="uq_connection_provider"),)
+
+
 class Sandbox(Base):
     """A visitor's private copy of a seeded tenant (DEMO_MODE). Expires after SANDBOX_TTL_HOURS."""
 

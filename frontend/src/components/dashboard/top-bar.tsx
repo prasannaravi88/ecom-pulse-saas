@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, MessageSquareText, Upload } from "lucide-react";
+import { Activity, MessageSquareText, Plug, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,11 +10,11 @@ import type { Currency } from "@/lib/format";
 import { ResetDemoButton, SandboxBadge } from "./demo-controls";
 import { Segmented } from "./segmented";
 
-export function TopBar({ tenants, tenantId, onTenant, currency, onCurrency, range, onRange, onUpload, onAnalyst, demo, onResetDemo }: {
+export function TopBar({ tenants, tenantId, onTenant, currency, onCurrency, range, onRange, onUpload, onConnect, onAnalyst, demo, onResetDemo }: {
   tenants: Tenant[]; tenantId: string | null; onTenant: (id: string) => void;
   currency: Currency; onCurrency: (c: Currency) => void;
   range: RangePreset; onRange: (r: RangePreset) => void;
-  onUpload: () => void; onAnalyst: () => void;
+  onUpload: () => void; onConnect: () => void; onAnalyst: () => void;
   demo: DemoStatus | null; onResetDemo: () => Promise<void>;
 }) {
   const sandbox = demo?.demo_mode ? demo : null;
@@ -54,6 +54,9 @@ export function TopBar({ tenants, tenantId, onTenant, currency, onCurrency, rang
 
         <div className="flex items-center gap-2">
           {sandbox && <ResetDemoButton status={sandbox} onReset={onResetDemo} className="max-sm:hidden" />}
+          <Button variant="outline" size="sm" onClick={onConnect} aria-label="Connect APIs">
+            <Plug className="size-3.5" aria-hidden /><span className="max-sm:hidden">Connect APIs</span>
+          </Button>
           <Button variant="outline" size="sm" onClick={onUpload} aria-label="Upload CSV">
             <Upload className="size-3.5" aria-hidden /><span className={sandbox ? "max-sm:hidden" : undefined}>Upload CSV</span>
           </Button>
